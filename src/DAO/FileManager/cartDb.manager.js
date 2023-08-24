@@ -22,9 +22,16 @@ export default class CartDbManager{
         return await cartModel.updateOne({_id:id},product);
     }
     deleteProductById = async (cartId,productId)=>{
-        const result = await cartModel.findByIdAndUpdate(
+        const result = await cartModel.updateOne(
             { _id: cartId},
             { $pull: { products: { _id : productId } } },
+          );
+          return result
+    }
+    deleteProductAll = async (cartId)=>{
+        const result = await cartModel.updateOne(
+            { _id: cartId},
+            { $set: { products: []} },
           );
           return result
     }

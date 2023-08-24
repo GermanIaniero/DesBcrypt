@@ -3,7 +3,7 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 
 const app = express()
-const uri = 'mongodb://admin:admin@localhost:27017/'
+const uri = 'mongodb+srv://gerlian:1234@clusterger.mgws5uk.mongodb.net/'
 
 app.use(session({
     store: MongoStore.create({

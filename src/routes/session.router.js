@@ -17,6 +17,8 @@ router.post('/login', passport.authenticate('login', '/login'), async (req, res)
     const { email, password } = req.body
     const user = await UserModel.findOne({ email, password }).lean().exec()
    
+    if(!user) return res.redirect("/login")
+
         if (user.email === "adminCoder@coder.com"){
             const passChek = await UserModel.findOne({ password}).lean().exec();
           
@@ -28,16 +30,17 @@ router.post('/login', passport.authenticate('login', '/login'), async (req, res)
         }    
            // return res.render("login");
     
+           req.session.user = user
+           
            if(!isValidPassword(user, password))return res.status(403).send({status:"error", error: "Incorrecta password"})
-    
-    if(!user) return alert("No existe el usuario")
+           
+           if(!user) return alert("No existe el usuario")
 
-    req.session.user = user
+           const products = await productModel.find().lean().exec()
+                    
+           res.render('home', { products, user})
 
-    const products = await productModel.find().lean().exec()
-    
-    res.render('home', { products, user})
-    console.log(user)  
+           console.log(user)  
 })
 
 

@@ -3,20 +3,99 @@ import local from 'passport-local'
 import UserModel from "../models/user.model.js"
 import GitHubStrategy from 'passport-github2'
 import { createHash, isValidPassword } from "../utils.js";
+import jwt from 'passport-jwt'
+import passportGoogle from 'passport-google-oauth20'
 
-/**
- * 
- * 
- * App ID: 375156
+const JWTStrategy = jwt.Strategy // La estrategia de JWT
+const ExtractJWT = jwt.ExtractJwt // La funcion de extraccion
 
-    Client ID: Iv1.42ae653ed8a66872
- *  Secret: 7eff1a591930fc3823944a2934e421ebdda6dba9
- */
 
+const cookieExtractor = req => {
+    const token = (req?.cookies) ? req.cookies['coderCookie'] : null
+
+    console.log('COOKIE EXTRACTOR: ', token)
+    return token
+}
+
+
+const initializePassport = () => {
+
+    passport.use(
+        'jwt',
+        new JWTStrategy(
+            {
+                jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
+                secretOrKey: 'coderTokenForJWT'
+            },
+            async (jwt_payload, done) => {
+
+                try {
+                    return done(null, jwt_payload)
+                } catch (e) {
+                    return done(e)
+                }
+            })
+    )
+
+}
+
+/*
+    App ID: 377939
+
+Client ID: Iv1.d73b35cdba36e500
+
+secret 33805847d0d2ff9e2ededbca26d8cfb8f876a485
+
+*/
+
+
+
+var GoogleStrategy = passportGoogle.Strategy;
+
+const GOOGLE_CLIENT_ID = '609516804216-3nioo3vq0d1vmtaq6o8itqnsusugu0om.apps.googleusercontent.com'
+const GOOGLE_CLIENT_SECRET = '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'
+
+
+const initializePassportGoogle = () => {
+    passport.use('google', new GoogleStrategy({
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: "http://127.0.0.1:8080/callback-google"
+    },
+     async (accessToken, refreshToken, profile, done) => {
+        console.log(profile)
+        const email = profile.emails[0].value
+        const name = profile.displayName
+
+        const user = await UserModel.findOne({ email })
+        if(user) {
+            console.log('Already exits')
+            return done(null, user)
+        }            
+
+        const result = await UserModel.create({ email, name, password: '' });
+
+        return done(null, result)
+
+     } 
+     
+     ));
+
+     passport.serializeUser((user, done) => {
+        done(null, user._id)
+    })
+
+    passport.deserializeUser(async (id, done) => {
+        const user = await UserModel.findById(id)
+        done(null, user)
+    })
+
+}
 
 const LocalStrategy = local.Strategy
 
-const initializePassport = () => {
+
+const initializePassportLocal = () => {
 
     // register Es el nomber para Registrar con Local
     passport.use('register', new LocalStrategy(
@@ -84,9 +163,9 @@ const initializePassportGit = () => {
 
     passport.use('github', new GitHubStrategy(
         {
-            clientID: 'Iv1.42ae653ed8a66872',
-            clientSecret: '7eff1a591930fc3823944a2934e421ebdda6dba9',
-            callbackURL: 'http://127.0.0.1:8080/githubcallback'
+            clientID: 'Iv1.Iv1.d73b35cdba36e500',
+            clientSecret: '33805847d0d2ff9e2ededbca26d8cfb8f876a485',
+            callbackURL: 'http://localhost:8080/githubcallback'
         },
         async (accessToken, refreshToken, profile, done) => {
             console.log(profile)

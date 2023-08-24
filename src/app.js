@@ -3,35 +3,45 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import handlebars from 'express-handlebars'
 import mongoose from 'mongoose'
-/*socketio
-
-
-const ChatManager = require("./dao/remote/managers/chat/chatManager")
-const chatManager = new ChatManager() */
-
+import productRouter from './routes/product.router.js'
+import {Server} from "socket.io"
+import chatModel from './DAO/mongoManager/models/modelMessage.js'
+import cartRouter from './routes/cart.router.js'
 
 import sessionRouter from './routes/session.router.js'
 import viewsRouter from './routes/views.router.js'
 
+import cookieParser from 'cookie-parser'
+import passport from 'passport'
+import jwtRouter from './routes/jwt.router.js'
+import initializePassport from './config/passsport.config.js'
+
+import ProductManager from './DAO/fileManager/product.manager.js'
+
 import __dirname from './utils.js'
 
-import passport from 'passport'
-import initializePassport from './config/passport.config.js'
 //import jwtRouter from './routes/jwt.router.js'
 
 const app = express()
+//mongoose.set('strictQuery', false)
 const uri = 'mongodb+srv://gerlian:1234@clusterger.mgws5uk.mongodb.net/'
-const dbName = 'Login'
+const dbName = 'Login2'
 
 
 // CONFIGURACION HANDLEBARS
 app.engine('handlebars', handlebars.engine())
 app.set('views', __dirname + '/views')
 app.set('view engine', 'handlebars')
+app.use('/products', productRouter)
+app.use('/cart', cartRouter)
+app.get('/', (req, res) => res.send('It works great!!'))
+
 
 // Configuracion para usar JSON en el post
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+app.use(cookieParser())
+app.use('/jwt', jwtRouter)
 
 
 // CONFIGURACION MONGO SESSIONS
@@ -70,66 +80,32 @@ mongoose.connect(uri, {dbName})
     })
     .catch(e => console.error(e))
     
-/*const io = new Server(httpServer);    
+//
+/*mongoose.connect(URL, {
+    dbName: 'eccommerce'
+})
+    .then(() => {
+        console.log('DB connected!!')
+    })
+    .catch(e => {
+        console.log("Can't connect to DB")
+    })
 
-io.on("connection", (socket) => {
-  console.log(`New user ${socket.id} joined`);
 
-  //Recibe del front
-  socket.on("client:newProduct", async (data) => {
-    const { title, description, price, code, stock, category } = data;
+    const io = new Server(httpServer);
 
-    const thumbnail = Array.isArray(data.thumbnail)
-      ? data.thumbnail
-      : [data.thumbnail];
+    const messages = []
 
-    if (!title || !description || !price || !code || !stock || !category) {
-      console.log("All fields are required");
-    }
 
-    const product = {
-      title,
-      description,
-      price: Number(price),
-      thumbnail,
-      code,
-      stock: Number(stock),
-      category,
-    };
+    io.on("connection", async (socket) => {
+      console.log("nueva conexion");
+      socket.on("client:message", async(data) => {
+         console.log('Información que viene del front:', data) 
+         await chatModel.create(data)
 
-    await productManager.addProduct(product);
+         messages.push(data)
+         //let prueba = await chatModel.find() 
+         socket.emit("server:messages",messages)
 
-    //Envia el back
-    const products = await productManager.getProducts();
-    const listProducts = products.filter((product) => product.status === true);
-
-    io.emit("server:list", listProducts);
-  });
-
-  //Recibe del front
-  socket.on("client:deleteProduct", async (data) => {
-    const id = data;
-
-    const logicalDeleteProduct = await productManager.logicalDeleteProduct(id);
-
-    //Envia el back
-    const products = await productManager.getProducts();
-
-    //Solo para mostrar los productos con status true
-    const listProducts = products.filter((product) => product.status === true);
-
-    io.emit("server:list", listProducts);
-  });
-
-  //Recibe del front
-  socket.on("client:message", async (data) => {
-    await chatManager.saveMessage(data)
-    //Envia el back
-    const messages = await chatManager.getMessages()
-    io.emit("server:messages", messages)
-  })
-
-  socket.on("disconnect", () => {
-    console.log(`User ${socket.id} disconnected`);
-  });
-}); */
+        })
+    })  */
