@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import cartModel from "../DAO/mongoManager/models/cartModel.js";
-import productModel from "../DAO/mongoManager/models/productModel.js";
+import cartModel from "../models/cartModel.js"
+//import productModel from "../DAO/mongoManager/models/productModel.js";
 import CartDbManager from "../DAO/FileManager/cartDb.manager.js";
 import mongoose from "mongoose";
 

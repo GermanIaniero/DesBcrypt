@@ -37,51 +37,51 @@ const initializePassport = () => {
             })
     )
 
-}
-
-/*
-    App ID: 377939
-
-Client ID: Iv1.d73b35cdba36e500
-
-secret 33805847d0d2ff9e2ededbca26d8cfb8f876a485
-
-*/
 
 
+    /*
+        App ID: 377939
+    
+    Client ID: Iv1.d73b35cdba36e500
+    
+    secret 33805847d0d2ff9e2ededbca26d8cfb8f876a485
+    
+    * google */
 
-var GoogleStrategy = passportGoogle.Strategy;
-
-const GOOGLE_CLIENT_ID = '609516804216-3nioo3vq0d1vmtaq6o8itqnsusugu0om.apps.googleusercontent.com'
-const GOOGLE_CLIENT_SECRET = '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'
 
 
-const initializePassportGoogle = () => {
+    var GoogleStrategy = passportGoogle.Strategy;
+
+    const GOOGLE_CLIENT_ID = '609516804216-3nioo3vq0d1vmtaq6o8itqnsusugu0om.apps.googleusercontent.com'
+    const GOOGLE_CLIENT_SECRET = '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'
+
+
+
     passport.use('google', new GoogleStrategy({
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
         callbackURL: "http://127.0.0.1:8080/callback-google"
     },
-     async (accessToken, refreshToken, profile, done) => {
-        console.log(profile)
-        const email = profile.emails[0].value
-        const name = profile.displayName
+        async (accessToken, refreshToken, profile, done) => {
+            console.log(profile)
+            const email = profile.emails[0].value
+            const name = profile.displayName
 
-        const user = await UserModel.findOne({ email })
-        if(user) {
-            console.log('Already exits')
-            return done(null, user)
-        }            
+            const user = await UserModel.findOne({ email })
+            if (user) {
+                console.log('Already exits')
+                return done(null, user)
+            }
 
-        const result = await UserModel.create({ email, name, password: '' });
+            const result = await UserModel.create({ email, name, password: '' });
 
-        return done(null, result)
+            return done(null, result)
 
-     } 
-     
-     ));
+        }
 
-     passport.serializeUser((user, done) => {
+    ));
+
+    passport.serializeUser((user, done) => {
         done(null, user._id)
     })
 
@@ -90,12 +90,11 @@ const initializePassportGoogle = () => {
         done(null, user)
     })
 
-}
+    /*locall */
+    const LocalStrategy = local.Strategy
 
-const LocalStrategy = local.Strategy
 
 
-const initializePassportLocal = () => {
 
     // register Es el nomber para Registrar con Local
     passport.use('register', new LocalStrategy(
@@ -157,9 +156,9 @@ const initializePassportLocal = () => {
         done(null, user)
     })
 
-}
 
-const initializePassportGit = () => {
+
+
 
     passport.use('github', new GitHubStrategy(
         {
@@ -170,21 +169,21 @@ const initializePassportGit = () => {
         async (accessToken, refreshToken, profile, done) => {
             console.log(profile)
 
-            try  {
-                const user = await UserModel.findOne({ email: profile._json.email  })
-                if(user) {
+            try {
+                const user = await UserModel.findOne({ email: profile._json.email })
+                if (user) {
                     console.log('User already exits ' + email)
                     return done(null, user)
                 }
 
                 const newUser = {
                     name: profile._json.name,
-                    email:  profile._json.email,
+                    email: profile._json.email,
                     password: ''
                 }
                 const result = await UserModel.create(newUser)
                 return done(null, result)
-            } catch(e) {
+            } catch (e) {
                 return done('Error to login wuth github' + e)
             }
         }

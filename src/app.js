@@ -3,9 +3,9 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import handlebars from 'express-handlebars'
 import mongoose from 'mongoose'
-import productRouter from './routes/product.router.js'
+//import productRouter from './routes/product.router.js'
 import {Server} from "socket.io"
-import chatModel from './DAO/mongoManager/models/modelMessage.js'
+//import chatModel from './models/'
 import cartRouter from './routes/cart.router.js'
 
 import sessionRouter from './routes/session.router.js'
@@ -14,9 +14,9 @@ import viewsRouter from './routes/views.router.js'
 import cookieParser from 'cookie-parser'
 import passport from 'passport'
 import jwtRouter from './routes/jwt.router.js'
-import initializePassport from './config/passsport.config.js'
+import initializePassport from './config/passport.config.js'
 
-import ProductManager from './DAO/fileManager/product.manager.js'
+import ProductManager from './DAO/files/product.manager.js'
 
 import __dirname from './utils.js'
 
@@ -25,16 +25,16 @@ import __dirname from './utils.js'
 const app = express()
 //mongoose.set('strictQuery', false)
 const uri = 'mongodb+srv://gerlian:1234@clusterger.mgws5uk.mongodb.net/'
-const dbName = 'Login2'
+//const dbName = 'Login2'
+
+const dbName = 'eccommerce'
 
 
 // CONFIGURACION HANDLEBARS
 app.engine('handlebars', handlebars.engine())
 app.set('views', __dirname + '/views')
 app.set('view engine', 'handlebars')
-app.use('/products', productRouter)
-app.use('/cart', cartRouter)
-app.get('/', (req, res) => res.send('It works great!!'))
+
 
 
 // Configuracion para usar JSON en el post

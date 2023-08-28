@@ -1,12 +1,13 @@
-import { Router } from "express";
+import { response, Router } from "express";
 import productModel from "../models/productModel.js";
-import cartModel from "../DAO/mongoManager/models/cartModel.js";
-import chatModel from "../DAO/mongoManager/models/modelMessage.js"
+import cartModel from "../models/cartModel.js";
+import passport from "passport";
+import chatModel from "../models/modelMessage.js"
 
 const router = Router()
 
 router.get('/', async (req, res) => {
-    const products = await productModel.find().lean().exec()
+    //const products = await productModel.find().lean().exec()
     
     const page = parseInt(req.query?.page || 1)
     const limit = parseInt(req.query?.limit || 10)
@@ -53,15 +54,15 @@ router.get('/', async (req, res) => {
     }
     const resultado= await cartModel.findOne();
     result.cartId = resultado._id
-       
+    res.render('home', result)   
     
-    if (req.session?.user) {
+   /*if (req.session?.user) {
         let user = (req.session.user)
         res.render('home', { products, user, result})    
     }
     else{
         res.render('home', { products, result})    
-    }
+    }*/
 
 })
 

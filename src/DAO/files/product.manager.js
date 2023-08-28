@@ -1,4 +1,4 @@
-import FileManager from "./file.manager.js";
+import FileManager from "./fileManager.js";
 
 export default class ProductManager extends FileManager {
 
