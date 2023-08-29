@@ -2,12 +2,12 @@ import passport from "passport";
 import local from 'passport-local'
 import UserModel from "../models/user.model.js"
 import GitHubStrategy from 'passport-github2'
-import { createHash, isValidPassword } from "../utils.js";
-import jwt from 'passport-jwt'
+import { extractCookie, generateToken } from "../utils.js";
+import passportJWT from 'passport-jwt'
 import passportGoogle from 'passport-google-oauth20'
 
-const JWTStrategy = jwt.Strategy // La estrategia de JWT
-const ExtractJWT = jwt.ExtractJwt // La funcion de extraccion
+const JWTStrategy = passportJWT.Strategy // La estrategia de JWT
+const JWTextract = passportJWT.ExtractJwt // La funcion de extraccion
 
 
 const cookieExtractor = req => {
@@ -25,16 +25,15 @@ const initializePassport = () => {
         new JWTStrategy(
             {
                 jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
-                secretOrKey: 'coderTokenForJWT'
+                secretOrKey: 'secretForJWT'
             },
             async (jwt_payload, done) => {
 
-                try {
+                    console.log( { jwt_payload } )
                     return done(null, jwt_payload)
-                } catch (e) {
-                    return done(e)
+                
                 }
-            })
+            )
     )
 
 
@@ -81,13 +80,13 @@ const initializePassport = () => {
 
     ));
 
-    passport.serializeUser((user, done) => {
-        done(null, user._id)
+    passport.serializeUser(async (user, done) => {
+        return done(null, user._id)
     })
 
     passport.deserializeUser(async (id, done) => {
         const user = await UserModel.findById(id)
-        done(null, user)
+        return  user
     })
 
     /*locall */
@@ -147,13 +146,13 @@ const initializePassport = () => {
         }
     ))
 
-    passport.serializeUser((user, done) => {
-        done(null, user._id)
+    passport.serializeUser(async(user, done) => {
+        return done (null, user._id)
     })
 
     passport.deserializeUser(async (id, done) => {
         const user = await UserModel.findById(id)
-        done(null, user)
+        return user
     })
 
 
@@ -170,22 +169,36 @@ const initializePassport = () => {
             console.log(profile)
 
             try {
-                const user = await UserModel.findOne({ email: profile._json.email })
+                const email = profile._json.email
+                console.log({email})
+                const user = await UserModel.findOne({ email }).lean().exec()
                 if (user) {
                     console.log('User already exits ' + email)
-                    return done(null, user)
-                }
+                   // return done(null, user)
+                }else {
+                    console.log(`User doesn't exits. So register them`)
 
-                const newUser = {
-                    name: profile._json.name,
-                    email: profile._json.email,
-                    password: ''
-                }
+                    const newUser = {
+                        name: profile._json.name,
+                        email,
+                        password: '',
+                        social: 'github',
+                        role: 'user'
+                }        
+   
                 const result = await UserModel.create(newUser)
-                return done(null, result)
+                console.log(result)
+                
+            } 
+            const token = generateToken(user)
+                user.token = token
+
+                return done(null, user)
+
             } catch (e) {
-                return done('Error to login wuth github' + e)
+                return done('Error to login iwth gitrhub' + e) 
             }
+            
         }
     ))
 
@@ -240,13 +253,13 @@ const initializePassport = () => {
         }
     ))
 
-    passport.serializeUser((user, done) => {
-        done(null, user._id)
+    passport.serializeUser(async(user, done) => {
+        return done(null, user._id)
     })
 
     passport.deserializeUser(async (id, done) => {
         const user = await UserModel.findById(id)
-        done(null, user)
+        return user
     })
 
 }

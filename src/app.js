@@ -68,10 +68,11 @@ app.use(passport.session())
 app.use('/api/session', sessionRouter)
 app.get('/health', (req, res) => res.send(`<h1>OK</h1>`))
 app.use('/', viewsRouter)
+//app.use('/', sessionRouter)
 
 
 // static files
-app.use('/static', express.static(__dirname + '/public'))
+app.use(express.static(__dirname + "/public"))
 
 mongoose.connect(uri, {dbName})
     .then(() => {
